@@ -1,4 +1,4 @@
-import React,{ Component } from 'react';
+import React,{ useState, useEffect } from 'react';
 import { connect } from 'react-redux';
 import axios from '../../axios-orders';
 import Aux from '../../hoc/Aux/Aux';
@@ -12,17 +12,14 @@ import Spinner from '../../components/UI/Spinner/Spinner';
 import * as actions from '../../store/actions/index';
 
 
-class BurgerBuilder extends Component {
+const BurgerBuilder = props => {
+    const [purchasing, setPurchasing] = useState(false);
+    
+    useEffect(() => {
+        props.onInitIngredients();
+    }, []);
 
-    state = {              
-        purchasing: false,        
-    }
-
-    componentDidMount (){
-        this.props.onInitIngredients();
-    }
-
-    updatePurchaseState (ingredients) {
+    const updatePurchaseState = (ingredients) => {
      
         const sum = Object.keys(ingredients)
             .map(igKey => {
@@ -34,70 +31,69 @@ class BurgerBuilder extends Component {
         return sum > 0;
     }
 
-    purchaseHandler = () => {
-        if (this.props.isAuthenticated){
-            this.setState({purchasing: true});
+    const purchaseHandler = () => {
+        if (props.isAuthenticated){
+            setPurchasing(true);
         } else{
-            this.props.onSetAuthRedirectPath('/checkout')
-            this.props.history.push('/auth')
+            props.onSetAuthRedirectPath('/checkout')
+            props.history.push('/auth')
         }
         
     }
 
-    purchaseCanselHandler = () => {
-        this.setState({purchasing: false})
+    const purchaseCanselHandler = () => {
+        setPurchasing(false)
     }
 
-    purchaseContinueHandler = () => {      
-        this.props.onInitPurchase();  
-        this.props.history.push('/checkout');
+    const purchaseContinueHandler = () => {      
+        props.onInitPurchase();  
+        props.history.push('/checkout');
     }
 
-    render () {
         const disabledInfo = {
-            ...this.props.ing
+            ...props.ing
         };
         for (let key in disabledInfo){
             disabledInfo[key] = disabledInfo[key] <= 0;
         }
         let orderSummary = null
         
-        let burger = this.props.error ? <p style={{textAlign:"center"}}>Ingredients can't be loaded</p> : <Spinner/>
+        let burger = props.error ? <p style={{textAlign:"center"}}>Ingredients can't be loaded</p> : <Spinner/>
 
-        if (this.props.ing){
+        if (props.ing){
             burger = (
                 <Aux>
-                    <Burger ingredients={this.props.ing}></Burger>
+                    <Burger ingredients={props.ing}></Burger>
                     <BuildControls 
-                        ingredientAdded={this.props.onIngredientAdded}
-                        ingredientRemoved={this.props.onIngredientRemoved}
+                        ingredientAdded={props.onIngredientAdded}
+                        ingredientRemoved={props.onIngredientRemoved}
                         disabled={disabledInfo}
-                        purchaseable={this.updatePurchaseState (this.props.ing)}
-                        ordered={this.purchaseHandler}
-                        isAuth={this.props.isAuthenticated}
-                        price={this.props.price}
+                        purchaseable={updatePurchaseState (props.ing)}
+                        ordered={purchaseHandler}
+                        isAuth={props.isAuthenticated}
+                        price={props.price}
                     />       
                 </Aux>
             )
             orderSummary = <OrderSummary 
-                ingredients={this.props.ing}
-                purchaseCanceled={this.purchaseCanselHandler}
-                purchaseContinued={this.purchaseContinueHandler}
-                price={this.props.price}
+                ingredients={props.ing}
+                purchaseCanceled={purchaseCanselHandler}
+                purchaseContinued={purchaseContinueHandler}
+                price={props.price}
             />;
 
         }       
        
         return (            
             <Aux>                
-                <Modal show={this.state.purchasing} modalClosed={this.purchaseCanselHandler}> 
+                <Modal show={purchasing} modalClosed={purchaseCanselHandler}> 
                     {orderSummary}
                 </Modal>
                 {burger}
                     
             </Aux>
         );
-    }
+    
 }
 
 
