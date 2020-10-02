@@ -22,9 +22,10 @@ const Orders = React.lazy(() => {
 
 
 const App = (props) => {
+  const {onTryAutoSignup} = props;
   useEffect(() => {
-    props.onTryAutoSignup();
-  }, []);
+    onTryAutoSignup();
+  }, [onTryAutoSignup]);
   
     let routes = (
       <Switch> 

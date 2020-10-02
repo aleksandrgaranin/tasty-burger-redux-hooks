@@ -9,10 +9,11 @@ import Spinner from '../../components/UI/Spinner/Spinner'
 import * as actions from '../../store/actions/index';
 
 
-const Orders = props => {   
+const Orders = props => {  
+    const { onFetchOrder } = props 
     useEffect(() => {
-        props.onFetchOrder(props.token, props.userId);
-    }, [])
+        onFetchOrder(props.token, props.userId);
+    }, [onFetchOrder])
 
         let orders = <Spinner />;
         if (!props.loading) {
